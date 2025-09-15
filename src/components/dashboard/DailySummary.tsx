@@ -30,7 +30,7 @@ export default function DailySummary({
         </p>
         <div className="w-full bg-gray-200 h-3 rounded-full">
           <div
-            className="bg-green-500 h-3 rounded-full transition-all"
+            className="bg-green-800 h-3 rounded-full transition-all"
             style={{ width: `${caloriePercent}%` }}
           />
         </div>

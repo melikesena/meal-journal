@@ -34,7 +34,7 @@ export default function DashboardLayout({ children}: DashboardLayoutProps) {
           <h1 className="text-xl font-semibold">Dashboard</h1>
           <div className="flex items-center gap-3">
             <span className="text-gray-600">Hi, User!</span>
-            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white">
+            <div className="w-10 h-10 rounded-full bg-green-800 flex items-center justify-center text-white">
               U
             </div>
           </div>

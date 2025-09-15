@@ -19,24 +19,24 @@ export default function AddMealForm({ onAdd, onClose }: AddMealFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!name || !portion || !calories) return
-    onAdd({ name, portion, calories }, mealType)
+    onAdd({ name, portion, calories, type: mealType }, mealType)
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Add a Meal</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
+      <div className="bg-white text-green-900 p-6 rounded-lg w-96 shadow-lg">
+        <h2 className="text-2xl font-bold mb-4">Add a Meal</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Meal Type */}
           <div>
-            <label className="block text-sm font-medium">Meal Type</label>
+            <label className="block text-sm font-medium mb-1">Meal Type</label>
             <select
               value={mealType}
               onChange={(e) =>
                 setMealType(e.target.value as "Breakfast" | "Lunch" | "Dinner")
               }
-              className="w-full border rounded p-2"
+              className="w-full border border-green-300 bg-green-100 text-green-900 rounded p-2 focus:outline-none focus:ring-2 focus:ring-green-300"
             >
               <option value="Breakfast">Breakfast</option>
               <option value="Lunch">Lunch</option>
@@ -46,36 +46,36 @@ export default function AddMealForm({ onAdd, onClose }: AddMealFormProps) {
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium">Meal Name</label>
+            <label className="block text-sm font-medium mb-1">Meal Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded p-2"
+              className="w-full border border-green-300 bg-green-100 text-green-900 rounded p-2 focus:outline-none focus:ring-2 focus:ring-green-300"
               required
             />
           </div>
 
           {/* Portion */}
           <div>
-            <label className="block text-sm font-medium">Portion</label>
+            <label className="block text-sm font-medium mb-1">Portion</label>
             <input
               type="text"
               value={portion}
               onChange={(e) => setPortion(e.target.value)}
-              className="w-full border rounded p-2"
+              className="w-full border border-green-300 bg-green-100 text-green-900 rounded p-2 focus:outline-none focus:ring-2 focus:ring-green-300"
               required
             />
           </div>
 
           {/* Calories */}
           <div>
-            <label className="block text-sm font-medium">Calories</label>
+            <label className="block text-sm font-medium mb-1">Calories</label>
             <input
               type="number"
               value={calories}
               onChange={(e) => setCalories(Number(e.target.value))}
-              className="w-full border rounded p-2"
+              className="w-full border border-green-300 bg-green-100 text-green-900 rounded p-2 focus:outline-none focus:ring-2 focus:ring-green-300"
               required
             />
           </div>
@@ -85,13 +85,13 @@ export default function AddMealForm({ onAdd, onClose }: AddMealFormProps) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded"
+              className="px-4 py-2 border border-green-400 text-green-900 rounded hover:bg-green-100 hover:text-green-800 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-green-600 text-green-900 font-semibold rounded hover:bg-green-300 transition"
             >
               Add
             </button>
