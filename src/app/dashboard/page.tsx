@@ -1,82 +1,62 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import DashboardLayout from "@/components/dashboard/DashboardLayout"
 import DailySummary from "@/components/dashboard/DailySummary"
 import MealList from "@/components/dashboard/MealList"
 import AddMealForm from "@/components/dashboard/AddMealForm"
 import type { Meal } from "@/types/meal"
-import { getMeals, createMeal, getDailyCalories, getWeeklyCalories } from "@/api/api"
+
+// Zustand store'larımız
+import useMealStore from "@/stores/useMealStore"
+import useAuthStore from "@/stores/useAuthStore"
 
 export default function DashboardPage() {
-  const [breakfastMeals, setBreakfastMeals] = useState<Meal[]>([])
-  const [lunchMeals, setLunchMeals] = useState<Meal[]>([])
-  const [dinnerMeals, setDinnerMeals] = useState<Meal[]>([])
+  const {
+    meals,
+    dailyCalories,
+    weeklyCalories,
+    fetchMeals,
+    fetchDailyCalories,
+    fetchWeeklyCalories,
+    addMeal,
+  } = useMealStore()
+
+  const { user } = useAuthStore()
+
   const [showForm, setShowForm] = useState(false)
-  const [dailyCalories, setDailyCalories] = useState<number>(0)
-  const [weeklyCalories, setWeeklyCalories] = useState<number>(0)
+  const todayStr = new Date().toISOString().split("T")[0] // YYYY-MM-DD
 
-    const todayStr = new Date().toISOString().split("T")[0] // YYYY-MM-DD
-
+  // Verileri çek
   useEffect(() => {
-    const fetchMeals = async () => {
-      try {
-        const allMeals = await getMeals(todayStr)
-        setBreakfastMeals(allMeals.filter((m: Meal) => m.type === "Breakfast"))
-        setLunchMeals(allMeals.filter((m: Meal) => m.type === "Lunch"))
-        setDinnerMeals(allMeals.filter((m: Meal) => m.type === "Dinner"))
-      } catch (error) {
-        console.error("Failed to fetch meals", error)
-      }
-    }
+    fetchMeals(todayStr)
+    fetchDailyCalories(todayStr)
+    fetchWeeklyCalories()
+  }, [todayStr, fetchMeals, fetchDailyCalories, fetchWeeklyCalories])
 
-    fetchMeals()
-  }, [todayStr])
-
-
-  
-
-  useEffect(() => {
-    const fetchCalories = async () => {
-      try {
-        const daily = await getDailyCalories(todayStr)
-        setDailyCalories(daily)
-
-        const weekly = await getWeeklyCalories()
-        setWeeklyCalories(weekly)
-      } catch (err) {
-        console.error("Failed to fetch calories", err)
-      }
-    }
-    fetchCalories()
-  }, [todayStr])
-
+  // Yemekleri type’a göre grupla
+  const breakfastMeals = meals.filter((m) => m.type === "Breakfast")
+  const lunchMeals = meals.filter((m) => m.type === "Lunch")
+  const dinnerMeals = meals.filter((m) => m.type === "Dinner")
 
   const handleAddMeal = async (meal: Meal, mealType: "Breakfast" | "Lunch" | "Dinner") => {
     try {
-      const newMeal = await createMeal({ ...meal, type: mealType })
-      if (mealType === "Breakfast") setBreakfastMeals([...breakfastMeals, newMeal])
-      if (mealType === "Lunch") setLunchMeals([...lunchMeals, newMeal])
-      if (mealType === "Dinner") setDinnerMeals([...dinnerMeals, newMeal])
-
-      const daily = await getDailyCalories(todayStr)
-      setDailyCalories(daily)
-
-      const weekly = await getWeeklyCalories()
-      setWeeklyCalories(weekly)
-    } catch (error) {
-      console.error("Failed to add meal", error)
+      await addMeal({ ...meal, type: mealType })
+    } catch (err) {
+      console.error("Meal eklenemedi", err)
     }
   }
 
   return (
     <DashboardLayout>
-      <h2 className="text-2xl font-bold mb-4">Welcome to your Dashboard!</h2>
+      <h2 className="text-2xl font-bold mb-4">
+        Welcome {user?.name ?? "User"} to your Dashboard!
+      </h2>
 
       <DailySummary
         calories={dailyCalories}
-        caloriesGoal={2000}
+        caloriesGoal={user?.dailyCalories ?? 2000}
         protein={60}
         carbs={150}
         fats={50}
@@ -93,7 +73,9 @@ export default function DashboardPage() {
         +
       </button>
 
-      {showForm && <AddMealForm onAdd={handleAddMeal} onClose={() => setShowForm(false)} />}
+      {showForm && (
+        <AddMealForm onAdd={handleAddMeal} onClose={() => setShowForm(false)} />
+      )}
     </DashboardLayout>
   )
 }

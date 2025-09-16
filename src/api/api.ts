@@ -93,4 +93,19 @@ export const getStatsByType = async () => {
   return res.data;
 };
 
+export const getCaloriesTrend = async (startDate?: string, endDate?: string) => {
+  const res = await api.get("/meals/stats/calories-trend", { params: { start: startDate, end: endDate } });
+  return res.data;
+};
+
+
+export const getDailyVsTarget = async () => {
+  const res = await api.get("/meals/stats/daily-vs-target");
+  return res.data;
+};
+
+export const getFavoriteMeal = async () => {
+  const res = await api.get("/meals/stats/favorite-meal");
+  return res.data;
+};
 export default api;

@@ -1,41 +1,32 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { getUserProfile, updateUserProfile } from "@/api/api"
+import { useAuthStore } from "@/stores/useAuthStore"
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<any>(null)
-  const [dailyCalories, setDailyCalories] = useState<number>(0)
+  const { user, loading, fetchProfile, setDailyCalories, logout } = useAuthStore()
   const [editingCalories, setEditingCalories] = useState(false)
   const [newCalories, setNewCalories] = useState<number>(0)
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await getUserProfile()
-        setUser(data)
-        setDailyCalories(data.dailyCalories || 2000) // default 2000
-      } catch (err) {
-        console.error("Profil alınamadı:", err)
-      }
+    // Sayfa açıldığında profil çek
+    if (!user) {
+      fetchProfile()
     }
-
-    fetchProfile()
-  }, [])
+  }, [user, fetchProfile])
 
   const handleCaloriesUpdate = async () => {
     try {
-      await updateUserProfile({ dailyCalories: newCalories })
-      setDailyCalories(newCalories)
+      await setDailyCalories(newCalories)
       setEditingCalories(false)
     } catch (err) {
       console.error("Kalori güncellenemedi:", err)
     }
   }
 
-  if (!user) return <p className="p-6 text-center">Loading...</p>
+  if (loading) return <p className="p-6 text-center">Yükleniyor...</p>
+  if (!user) return <p className="p-6 text-center">Profil bulunamadı</p>
 
   return (
     <div className="min-h-screen bg-green-50 p-6">
@@ -52,7 +43,9 @@ export default function ProfilePage() {
           <div>
             <h1 className="text-xl font-semibold text-green-900">{user.name}</h1>
             <p className="text-green-700">{user.email}</p>
-            <p className="text-sm text-green-600">Üyelik tarihi: {new Date(user.createdAt).toLocaleDateString()}</p>
+            <p className="text-sm text-green-600">
+              Üyelik tarihi: {user.date ? new Date(user.date).toLocaleDateString() : "Bilinmiyor"}
+            </p>
           </div>
         </div>
 
@@ -60,12 +53,14 @@ export default function ProfilePage() {
         <div className="mt-6 bg-green-100 rounded-lg p-4 text-center">
           {!editingCalories ? (
             <>
-              <p className="text-lg font-bold text-green-900">{dailyCalories} kcal</p>
+              <p className="text-lg font-bold text-green-900">
+                {user.dailyCalories || 2000} kcal
+              </p>
               <p className="text-sm text-green-700">Günlük Kalori Hedefi</p>
               <button
                 className="mt-2 px-4 py-1 bg-green-200 text-green-900 rounded hover:bg-green-300 transition"
                 onClick={() => {
-                  setNewCalories(dailyCalories)
+                  setNewCalories(user.dailyCalories || 2000)
                   setEditingCalories(true)
                 }}
               >
@@ -98,21 +93,7 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Özet */}
-        <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-          <div className="bg-green-100 rounded-lg p-4">
-            <p className="text-lg font-bold text-green-900">{user.totalMeals || 0}</p>
-            <p className="text-sm text-green-700">Toplam Öğün</p>
-          </div>
-          <div className="bg-green-100 rounded-lg p-4">
-            <p className="text-lg font-bold text-green-900">{user.weeklyMeals || 0}</p>
-            <p className="text-sm text-green-700">Haftalık Öğün</p>
-          </div>
-          <div className="bg-green-100 rounded-lg p-4">
-            <p className="text-lg font-bold text-green-900">{user.favoriteMeal || "Kahvaltı"}</p>
-            <p className="text-sm text-green-700">En çok eklenen</p>
-          </div>
-        </div>
+        
 
         {/* Ayarlar */}
         <div className="mt-6">
@@ -129,7 +110,10 @@ export default function ProfilePage() {
               </button>
             </li>
             <li>
-              <button className="w-full text-left bg-green-100 text-green-900 hover:bg-green-200 px-4 py-2 rounded-lg transition">
+              <button
+                onClick={logout}
+                className="w-full text-left bg-green-100 text-green-900 hover:bg-green-200 px-4 py-2 rounded-lg transition"
+              >
                 Çıkış Yap
               </button>
             </li>
